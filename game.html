@@ -124,9 +124,21 @@
                     }
                    }
                    if(keymap[37]){ // 左矢印キー(←)
+                     if((life_count == 2 && restart_count == 0) || (life_count == 1 && restart_count == 1)){ // ボールが死んだ時、if文は真になる。
+                       /* alert()が起動すると、keydownの情報を保持し続け、さらに変更もできない状態になるので、キーを押した状態(keydownがtrueの状態)でボールが死ぬと、
+                       次のターンに壁際まで勝手に動いてその後動かなくなった。(この関数が再度実行されkeydownがfalseになる前に、
+                       restart()内のalert()が実行され、keydownがtrueの状態でalert()を通るので、）それを防ぐために、restart()に行く前のここで、keydownの情報をfalseにしている。 */
+                        keymap[37]=false;
+                     }
                      engine.entities[0].x -= speed1; // barの座標を左に進める
                    }
                    else if(keymap[39]){ // 右矢印キー(→)
+                     if((life_count == 2 && restart_count == 0) || (life_count == 1 && restart_count == 1)){ // ボールが死んだ時、if文は真になる。
+                       /* alert()が起動すると、keydownの情報を保持し続け、さらに変更もできない状態になるので、キーを押した状態(keydownがtrueの状態)でボールが死ぬと、
+                       次のターンに壁際まで勝手に動いてその後動かなくなった。(この関数が再度実行されkeydownがfalseになる前に、
+                       restart()内のalert()が実行され、keydownがtrueの状態でalert()を通るので、）それを防ぐために、restart()に行く前のここで、keydownの情報をfalseにしている。 */
+                        keymap[39]=false;
+                     }
                      engine.entities[0].x += speed1; // barの座標を右に進める
                    }
                    engine.entities[0].x=Math.max(0,Math.min(515,engine.entities[0].x));/* xが0~500までに制限(barの左端に座標点があるので、
