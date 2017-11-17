@@ -1,0 +1,301 @@
+﻿<!DOCTYPE html>
+<html>
+     <head>
+          <link rel="stylesheet" type="text/css" href="style.css"/>
+          <meta charset="UTF-8">
+          <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+          <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+          <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+          <script>
+          $(function() {
+            $( "#slider" ).slider();
+          });
+          </script>
+          <style>
+              #canvas{ /* canvas適用範囲設定(css) */
+                   width:600px;
+                   height:610px;
+                   touch-action:none;
+              }
+              #START{ /* css */
+                position:absolute;
+                left:100px;
+                top:250px;
+              }
+          </style>
+          <script type="text/javascript"> // 音声ボリュームに関する処理
+            window.onload = function(){
+                setVolume( 0.5 );
+                document.getElementById( "bgm" ).value = 0.5;
+            }
+            function setVolume( $volume ) {
+                var $elementReference = document.getElementById( "bgm" );
+                $elementReference.volume = $volume;
+                var $volume = $elementReference.volume;
+                document.getElementById( "OutputVolume" ).innerHTML = $volume;
+            }
+          </script>
+          <script src="Tiny2D.js">// 物理エンジン呼び出し</script>
+          <script>
+               "use strict"; // 厳格モード
+
+               var engine, ctx, block_count=0, life_count=3, clear=0, key_control,speed1=5,speed2=0.1,speed3=0.3, restart_count = 0;
+               /*
+                 engineは物理エンジン、ctxは、canvasに関する処理、block_countはブロックの数、clearは、クリアしたかの判定、key_controlは、key eventに関する処理をするオブジェクトの生成に使い、
+　　　　　　　　 speed1はbarのスピード、speed2はボールx軸のスピード、speed3はボールy軸のスピード、restart_countはボールが死んだ後すぐに(1回目に)呼ばれたrestart関数かどうかの判断、に使う変数
+               */
+               var keymap=[]; //key eventに使う配列
+               var colors=["yellow","green","orange","blue","white", "red"]; // ボールのための色指定
+
+               var walls=[ //壁の位置指定
+                 [0,0.1,600,0.1],
+                 [0,0.1,0.1,629.9],
+                 [600,0.1,0.1,629.9],
+               ];
+
+               function rand(v){ // 乱数生成
+                      return Math.floor(Math.random()*v);
+               }
+
+               function Key_control(){ // key eventに関する処理
+
+                 this.keydown=function(e){ // 押された処理
+                   keymap[e.keyCode]=true;
+                 }
+                 this.keyup=function(e){ // 離された処理
+                   keymap[e.keyCode]=false;
+                 }
+                 this.move=function(){ // 繰り返される処理
+                   if(keymap[65]){ // Aキー
+
+                     if( engine.entities[4].velocity.x<0 && engine.entities[4].velocity.y>0){ // 左下
+                          engine.entities[4].velocity.x=(engine.entities[4].velocity.x)-speed2;
+                          engine.entities[4].velocity.y=(engine.entities[4].velocity.y)+speed3;
+                     }
+                     else if( engine.entities[4].velocity.x>0 && engine.entities[4].velocity.y>0){ // 右下
+                          engine.entities[4].velocity.x=(engine.entities[4].velocity.x)+speed2;
+                          engine.entities[4].velocity.y=(engine.entities[4].velocity.y)+speed3;
+                     }
+                     else if( engine.entities[4].velocity.x<0 && engine.entities[4].velocity.y<0){ // 左上
+                          engine.entities[4].velocity.x=(engine.entities[4].velocity.x)-speed2;
+                          engine.entities[4].velocity.y=(engine.entities[4].velocity.y)-speed3;
+                     }
+                     else if( engine.entities[4].velocity.x>0 && engine.entities[4].velocity.y<0){ // 右上
+                          engine.entities[4].velocity.x=(engine.entities[4].velocity.x)+speed2;
+                          engine.entities[4].velocity.y=(engine.entities[4].velocity.y)-speed3;
+                     }
+                   }
+                   else if(keymap[81]){ // Qキー
+                    if((engine.entities[4].velocity.x>=0.2 &&  engine.entities[4].velocity.y<=-0.6) ||
+                       (engine.entities[4].velocity.x<=-0.2 && engine.entities[4].velocity.y<=-0.6) ||
+                       (engine.entities[4].velocity.y>=0.6  && engine.entities[4].velocity.x<=-0.2) ||
+                       (engine.entities[4].velocity.y>=0.6  && engine.entities[4].velocity.x>=0.2)){ //最低速度をx=0.1or-0.1,y=0.3or-0.3に設定するための条件分岐処理
+
+                         if( engine.entities[4].velocity.x<0 && engine.entities[4].velocity.y>0){ //左下
+                               engine.entities[4].velocity.x=(engine.entities[4].velocity.x)+speed2;
+                               engine.entities[4].velocity.y=(engine.entities[4].velocity.y)-speed3;
+
+                          }
+                          else if( engine.entities[4].velocity.x>0 && engine.entities[4].velocity.y>0){ // 右下
+                               engine.entities[4].velocity.x=(engine.entities[4].velocity.x)-speed2;
+                               engine.entities[4].velocity.y=(engine.entities[4].velocity.y)-speed3;
+
+                          }
+                          else if( engine.entities[4].velocity.x<0 && engine.entities[4].velocity.y<0){ // 左上
+                               engine.entities[4].velocity.x=(engine.entities[4].velocity.x)+speed2;
+                               engine.entities[4].velocity.y=(engine.entities[4].velocity.y)+speed3;
+
+
+                          }
+                          else if( engine.entities[4].velocity.x>0 && engine.entities[4].velocity.y<0){ // 右上
+                               engine.entities[4].velocity.x=(engine.entities[4].velocity.x)-speed2;
+                               engine.entities[4].velocity.y=(engine.entities[4].velocity.y)+speed3;
+                          }
+                      }
+                   }
+                   if(keymap[83]){ // Sキー
+                     speed1=speed1+1;
+                   }
+                   else if(keymap[87]){ // Wキー
+                    if(speed1>1){ /* 最大2までtrueで通し、speed1の最小の値を1までにしている。
+                                      (0まで行ってしまうと、barが止まってしまうし、マイナスの値になると、
+                                      矢印キーと逆の方向に進み出すから) */
+                      speed1=speed1-1;
+                    }
+                   }
+                   if(keymap[37]){ // 左矢印キー(←)
+                     engine.entities[0].x -= speed1; // barの座標を左に進める
+                   }
+                   else if(keymap[39]){ // 右矢印キー(→)
+                     engine.entities[0].x += speed1; // barの座標を右に進める
+                   }
+                   engine.entities[0].x=Math.max(0,Math.min(515,engine.entities[0].x));/* xが0~500までに制限(barの左端に座標点があるので、
+                                                                                          barの長さ85分を引いた500で、ちょうどbarが壁に
+                                                                                          当たるから0~500に設定)*/
+                 }
+               }
+               function restart(){ // ボールが死んだ時に重要になる関数
+                 if((life_count == 2 && restart_count == 0) || (life_count == 1 && restart_count == 1)){ // ボールが死んだ時、if文は真になる。
+                    alert("このメッセージを消すと始まるよ！"); // ボールが死んだ後すぐに、次の新しいボールが動き出すのを抑制するために使用。
+                    restart_count++; // ボールが死んだ時だけ、このif文の中に入るようにするためにインクリメント
+                 }
+               }
+
+              function init(){ // 実行開始
+                   var block;
+
+                   engine=new Engine(0,0,600,610,0,0); //物理世界をengineオブジェクトで作成(bar)
+
+                   key_control=new Key_control(); //key eventに関する処理をするオブジェクトを生成
+                   document.onkeydown= key_control.keydown; // //keydownに関する処理
+                   document.onkeyup= key_control.keyup; // keyupに関する処理
+
+                     var r=new RectangleEntity(260,550,85,10); // bar
+
+                     if(life_count==3){ // 初めのbarの色
+                       r.color="lime";
+                     }
+
+
+                     engine.entities.push(r); //engine.entities[]配列に入れる
+
+                     walls.forEach(function(w){ // walls
+                     r=new RectangleEntity(w[0],w[1],w[2],w[3]);
+                     r.color="orange";
+                     engine.entities.push(r); //engine.entities[]配列に入れる
+                   });
+
+               r=new CircleEntity(300,300,8,BodyDynamic); // 動くボールの生成(座標指定)
+               r.color="orange";
+               r.onhit = function (me, peer) {
+                  engine.entities = engine.entities.filter(function(e) {
+                        if((e==engine.entities[0])||(e==engine.entities[1])||
+                        (e==engine.entities[2])||(e==engine.entities[3])){ // barとwallsはtrue
+                          return true;
+                        }
+                        else if(e!=peer){ /* e(engine.entities[]に保存されているオブジェクト)
+                                             とpeer(衝突相手)が違えば、true */
+                          return true;
+                        }
+                        else{ // それ以外(衝突相手)はfalse
+                          false;
+                          block_count -=1; // block削除数を記録
+                          if(block_count==0){ // 全てのblokが消えれば
+                            clear=1; // 1にして勝利判定を真で通るようにする
+                          }
+                        }
+                    });
+                  }
+
+                  r.velocity.x=1; // ボールが進むx座標を指定(x=1)
+                  r.velocity.y=3; // ボールが進むy座標を指定(x=3)
+                  engine.entities.push(r); // 描画
+
+                  for(var i=0; i<7; i++){ // block表示
+                   for(var j=0; j<6; j++){
+                      block=new RectangleEntity(i*60+100,j*20+100,50,15);// 座標指定
+                      block.color=colors[j]; // 色指定
+                      engine.entities.push(block); // 描画
+                      block_count +=1; // ブロックを数える
+                    }
+                  }
+                     ctx=document.getElementById("canvas").getContext("2d");
+                     ctx.font="50pt Arial";
+                  repaint(); // 再描画
+               }
+
+               function go(){ // startボタンを押した時に実行される関数
+                 document.getElementById("START").style.display="none"; //画像削除
+                 document.getElementById("bgm").play(); // BGM再生
+                  setInterval(tick,10); // 10間隔でtickを実行
+               }
+
+               function tick(){ // 時間を少し進めて再描画する関数
+                 engine.step(3); // 物理エンジンの時間を少し進める
+                 key_control.move(); //key_controlメソッドのmove()関数を実行
+                 restart();
+                 repaint(); // 再描画
+               }
+
+               function repaint(){ // 再描画
+                 ctx.drawImage(background, 0,0,600,610); // 背景指定
+
+                 for(var i=0; i<engine.entities.length;i++){ // 様々なオブジェクトを描画
+                   var e=engine.entities[i];
+                   ctx.fillStyle=e.color; // オブジェクトの中身の塗りつぶしカラー
+                   ctx.strokeStyle=e.color; // オブジェクトの輪郭形状のカラー
+                   switch(e.shape){
+                     case ShapeRectangle: // 矩形の場合
+                       ctx.fillRect(e.x,e.y,e.w,e.h);
+                       break;
+                     case ShapeCircle: // 円の場合
+                       ctx.beginPath();
+                       ctx.arc(e.x,e.y,e.radius,0,Math.PI*2,0);
+                       ctx.closePath();
+                       ctx.fill();
+                       break;
+                   }
+                   if(i==4 && e.y> 580 ){ // ボールがbarより下に行けば
+                      life_count -=1; // ライフを一個減らす
+                      if(life_count==2){ // ライフ残り2個
+                       engine.entities[4].x=300; // ライフ残り2個の状況でのボールの初出現場所
+                       engine.entities[4].y=300; // ライフ残り2個の状況でのボールの初出現場所
+                       engine.entities[4].velocity.x=1; // ボールが進むx座標を指定(x=1)
+                       engine.entities[4].velocity.y=3; // ボールが進むy座標を指定(x=3)
+                       engine.entities[0].color="yellow"; // ライフ残り2個の状況でのbarの色
+                       engine.entities[0].x=260; // barの初期値
+                     }
+                     else if(life_count==1){ //// ライフ残り1個
+                       engine.entities[4].x=300; // ライフ残り2個の状況でのボールの初出現場所
+                       engine.entities[4].y=300; // ライフ残り2個の状況でのボールの初出現場所
+                       engine.entities[4].velocity.x=1; // ボールが進むx座標を指定(x=1)
+                       engine.entities[4].velocity.y=3; // ボールが進むy座標を指定(x=3)
+                       engine.entities[0].color="red"; // ライフ残り2個の状況でのbarの色
+                       engine.entities[0].x=260; // barの初期値
+                     }
+                   }
+                 }
+                 if(clear==1){ // クリアした場合
+                   document.getElementById("bgm").pause(); // BGM停止
+                   ctx.fillStyle="orange"; //オレンジ色で文字を描画
+                   ctx.fillText("CLEAR", 200,300); // ステージCLEAR
+                 }
+                 else if(life_count<=0){
+                   document.getElementById("bgm").pause(); // BGM停止
+                   ctx.fillStyle="orange"; //オレンジ色で文字を描画
+                   ctx.fillText("GAME OVER", 100,300); // ステージGAME OVER
+                 }
+               }
+          </script>
+     </head>
+     <body onload="init()" topmargin="0">
+     <div id="equivalent">
+       <audio src="Escape.mp3" id="bgm" loop="loop"></audio>
+       <table>
+       <tr>
+           <th>
+               <canvas id="canvas" width="600" height="610" style="float:left"></canvas>
+           </th>
+           <th align="left">
+               <h1>　説明　　<input type="range" value="0.5" id="bgm" min="0" max="1" step="0.1" onchange="setVolume(this.value)"></h1>
+               <h3>　　1.左矢印キー(←)と右矢印キー(→)で操作</h3>
+               <h3>　　2.上のブロックを全て消せばクリア</h3>
+               <h3>　　3.AキーとQキーでボールの速さを変更</h3>
+               <h3>　　　 ・Aキー：増速</h3>
+               <h3>　　　 ・Qキー：減速</h3>
+               <h3>　　4.SキーとWキーでバーの速さを変更</h3>
+               <h3>　　　 ・Sキー：増速</h3>
+               <h3>　　　 ・Wキー：減速</h3>
+               <h3>　　5.F5キーでやり直し(ページ更新)</h3>
+               <h3>　　6.ライフは３つ</h3>
+               <h3>　　　 ・青色バー(<img src="blue_bar.jpg" width="70px" height="11px" style="margin: 0px 2px 1px 2px;">)：残り2回</h3>
+               <h3>　　　 ・黄色バー(<img src="yellow_bar.jpg" width="70px" height="11px" style="margin: 0px 2px 1px 2px;">)：残り1回</h3>
+               <h3>　　　 ・赤色バー(<img src="red_bar.jpg" width="70px" height="11px" style="margin: 0px 2px 1px 2px;">)：ラスト</h3>
+            </th>
+       </tr>
+       </table>
+       <img id="START" src="start.png" onclick="go()"><br/>
+       <img id="background" src="background.jpg" style="display:none" />
+       </div>
+     </body>
+</html>
