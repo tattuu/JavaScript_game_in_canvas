@@ -67,45 +67,48 @@
                  }
                  this.move=function(){ // 繰り返される処理
                    if(keymap[65]){ // Aキー
-
-                     if( engine.entities[4].velocity.x<0 && engine.entities[4].velocity.y>0){ // 左下
-                          engine.entities[4].velocity.x=(engine.entities[4].velocity.x)-speed2;
-                          engine.entities[4].velocity.y=(engine.entities[4].velocity.y)+speed3;
-                     }
-                     else if( engine.entities[4].velocity.x>0 && engine.entities[4].velocity.y>0){ // 右下
-                          engine.entities[4].velocity.x=(engine.entities[4].velocity.x)+speed2;
-                          engine.entities[4].velocity.y=(engine.entities[4].velocity.y)+speed3;
-                     }
-                     else if( engine.entities[4].velocity.x<0 && engine.entities[4].velocity.y<0){ // 左上
-                          engine.entities[4].velocity.x=(engine.entities[4].velocity.x)-speed2;
-                          engine.entities[4].velocity.y=(engine.entities[4].velocity.y)-speed3;
-                     }
-                     else if( engine.entities[4].velocity.x>0 && engine.entities[4].velocity.y<0){ // 右上
-                          engine.entities[4].velocity.x=(engine.entities[4].velocity.x)+speed2;
-                          engine.entities[4].velocity.y=(engine.entities[4].velocity.y)-speed3;
-                     }
+                       if( engine.entities[4].velocity.x<0 && engine.entities[4].velocity.y>0){ // 左下
+                            engine.entities[4].velocity.x=(engine.entities[4].velocity.x)-speed2;
+                            engine.entities[4].velocity.y=(engine.entities[4].velocity.y)+speed3;
+                            engine.entities[4].velocity.x=Math.max(-3,Math.min(0,engine.entities[4].velocity.x)); // 最大速度を制限(これをしないとボールと壁が接触する事がなくなってしまい、当たり判定が効かなくなるので、壁をすり抜けてしまう。)
+                            engine.entities[4].velocity.y=Math.max(0,Math.min(9,engine.entities[4].velocity.y)); // 最大速度を制限(これをしないとボールと壁が接触する事がなくなってしまい、当たり判定が効かなくなるので、壁をすり抜けてしまう。)
+                       }
+                       else if( engine.entities[4].velocity.x>0 && engine.entities[4].velocity.y>0){ // 右下
+                            engine.entities[4].velocity.x=(engine.entities[4].velocity.x)+speed2;
+                            engine.entities[4].velocity.y=(engine.entities[4].velocity.y)+speed3;
+                            engine.entities[4].velocity.x=Math.max(0,Math.min(3,engine.entities[4].velocity.x)); // 最大速度を制限(これをしないとボールと壁が接触する事がなくなってしまい、当たり判定が効かなくなるので、壁をすり抜けてしまう。)
+                            engine.entities[4].velocity.y=Math.max(0,Math.min(9,engine.entities[4].velocity.y)); // 最大速度を制限(これをしないとボールと壁が接触する事がなくなってしまい、当たり判定が効かなくなるので、壁をすり抜けてしまう。)
+                       }
+                       else if( engine.entities[4].velocity.x<0 && engine.entities[4].velocity.y<0){ // 左上
+                            engine.entities[4].velocity.x=(engine.entities[4].velocity.x)-speed2;
+                            engine.entities[4].velocity.y=(engine.entities[4].velocity.y)-speed3;
+                            engine.entities[4].velocity.x=Math.max(-3,Math.min(0,engine.entities[4].velocity.x));　// 最大速度を制限(これをしないとボールと壁が接触する事がなくなってしまい、当たり判定が効かなくなるので、壁をすり抜けてしまう。)
+                            engine.entities[4].velocity.y=Math.max(-9,Math.min(0,engine.entities[4].velocity.y));　// 最大速度を制限(これをしないとボールと壁が接触する事がなくなってしまい、当たり判定が効かなくなるので、壁をすり抜けてしまう。)
+                       }
+                       else if( engine.entities[4].velocity.x>0 && engine.entities[4].velocity.y<0){ // 右上
+                            engine.entities[4].velocity.x=(engine.entities[4].velocity.x)+speed2;
+                            engine.entities[4].velocity.y=(engine.entities[4].velocity.y)-speed3;
+                            engine.entities[4].velocity.x=Math.max(0,Math.min(3,engine.entities[4].velocity.x));　// 最大速度を制限(これをしないとボールと壁が接触する事がなくなってしまい、当たり判定が効かなくなるので、壁をすり抜けてしまう。)
+                            engine.entities[4].velocity.y=Math.max(-9,Math.min(0,engine.entities[4].velocity.y));　// 最大速度を制限(これをしないとボールと壁が接触する事がなくなってしまい、当たり判定が効かなくなるので、壁をすり抜けてしまう。)
+                       }
                    }
                    else if(keymap[81]){ // Qキー
-                    if((engine.entities[4].velocity.x>=0.2 &&  engine.entities[4].velocity.y<=-0.6) ||
-                       (engine.entities[4].velocity.x<=-0.2 && engine.entities[4].velocity.y<=-0.6) ||
-                       (engine.entities[4].velocity.y>=0.6  && engine.entities[4].velocity.x<=-0.2) ||
-                       (engine.entities[4].velocity.y>=0.6  && engine.entities[4].velocity.x>=0.2)){ //最低速度をx=0.1or-0.1,y=0.3or-0.3に設定するための条件分岐処理
+                    if((engine.entities[4].velocity.x>0.1 &&  engine.entities[4].velocity.y<-0.5) || // 右上
+                       (engine.entities[4].velocity.x<-0.1 && engine.entities[4].velocity.y<-0.5) || // 左上
+                       (engine.entities[4].velocity.y>0.5  && engine.entities[4].velocity.x<-0.1) || // 左下
+                       (engine.entities[4].velocity.y>0.5  && engine.entities[4].velocity.x>0.1)){ //最低速度をx=0.1or-0.1,y=0.3or-0.3に設定するための条件分岐処理
 
                          if( engine.entities[4].velocity.x<0 && engine.entities[4].velocity.y>0){ //左下
                                engine.entities[4].velocity.x=(engine.entities[4].velocity.x)+speed2;
                                engine.entities[4].velocity.y=(engine.entities[4].velocity.y)-speed3;
-
                           }
                           else if( engine.entities[4].velocity.x>0 && engine.entities[4].velocity.y>0){ // 右下
                                engine.entities[4].velocity.x=(engine.entities[4].velocity.x)-speed2;
                                engine.entities[4].velocity.y=(engine.entities[4].velocity.y)-speed3;
-
                           }
                           else if( engine.entities[4].velocity.x<0 && engine.entities[4].velocity.y<0){ // 左上
                                engine.entities[4].velocity.x=(engine.entities[4].velocity.x)+speed2;
                                engine.entities[4].velocity.y=(engine.entities[4].velocity.y)+speed3;
-
-
                           }
                           else if( engine.entities[4].velocity.x>0 && engine.entities[4].velocity.y<0){ // 右上
                                engine.entities[4].velocity.x=(engine.entities[4].velocity.x)-speed2;
@@ -256,6 +259,8 @@
                        engine.entities[4].velocity.y=3; // ボールが進むy座標を指定(x=3)
                        engine.entities[0].color="yellow"; // ライフ残り2個の状況でのbarの色
                        engine.entities[0].x=260; // barの初期値
+                       speed2 = 0.1; // x座標のスピード
+                       speed3 = 0.3; // y座標のスピード
                      }
                      else if(life_count==1){ //// ライフ残り1個
                        engine.entities[4].x=300; // ライフ残り2個の状況でのボールの初出現場所
@@ -264,6 +269,8 @@
                        engine.entities[4].velocity.y=3; // ボールが進むy座標を指定(x=3)
                        engine.entities[0].color="red"; // ライフ残り2個の状況でのbarの色
                        engine.entities[0].x=260; // barの初期値
+                       speed2 = 0.1; // x座標のスピード
+                       speed3 = 0.3; // y座標のスピード
                      }
                    }
                  }
