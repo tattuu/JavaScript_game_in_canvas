@@ -259,8 +259,9 @@
                        engine.entities[4].velocity.y=3; // ボールが進むy座標を指定(x=3)
                        engine.entities[0].color="yellow"; // ライフ残り2個の状況でのbarの色
                        engine.entities[0].x=260; // barの初期値
-                       speed2 = 0.1; // x座標のスピード
-                       speed3 = 0.3; // y座標のスピード
+                       speed1 = 5; // barのスピード(x座標)
+                       speed2 = 0.1; // ballのx座標のスピード
+                       speed3 = 0.3; // ballのy座標のスピード
                      }
                      else if(life_count==1){ //// ライフ残り1個
                        engine.entities[4].x=300; // ライフ残り2個の状況でのボールの初出現場所
@@ -269,6 +270,7 @@
                        engine.entities[4].velocity.y=3; // ボールが進むy座標を指定(x=3)
                        engine.entities[0].color="red"; // ライフ残り2個の状況でのbarの色
                        engine.entities[0].x=260; // barの初期値
+                       speed1 = 5; // barのスピード(x座標)
                        speed2 = 0.1; // x座標のスピード
                        speed3 = 0.3; // y座標のスピード
                      }
